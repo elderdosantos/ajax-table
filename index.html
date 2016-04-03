@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8" />
+        <title>AjaxTable</title>
+        <script src="bower_components/webcomponentsjs/webcomponents.js"></script>
+        <link rel="import" href="components/ajax-table.html" />
+    </head>
+    <body>
+        <ajax-table
+            url="https://api.github.com/users/yiisoft/repos"
+            columns="id:#|name:Repositório|description:Descrição|html_url:Link:url"></ajax-table>
+    </body>
+</html>

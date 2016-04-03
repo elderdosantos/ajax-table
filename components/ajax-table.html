@@ -1,0 +1,136 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<dom-module id="ajax-table">
+    <style>
+        #e-ajax-table {
+            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        #e-ajax-table td, #e-ajax-table th {
+            border: 1px solid #ddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        #e-ajax-table tr:nth-child(even){background-color: #f2f2f2}
+
+        #e-ajax-table tr:hover {background-color: #ddd;}
+
+        #e-ajax-table th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            background-color: #4CAF50;
+            color: white;
+        }
+
+    </style>
+    <script>
+        HTMLImports.whenReady(function () {
+            function isReady($state) {
+                if ($state == 4) return true;
+
+                return false;
+            }
+
+            function colId($col) {
+                var arr = $col.split(":");
+
+                return arr[0];
+            }
+
+            function colName($col) {
+                var arr = $col.split(":");
+
+                if (arr.length == 1) {
+                    return arr[0];
+                }
+
+                return arr[1];
+            }
+
+            function colType($col)
+            {
+                var arr = $col.split(":");
+
+                if (arr.length == 3) {
+                    return arr[2];
+                }
+
+                return 'text';
+            }
+
+            (function ()  {
+                Polymer({
+                    is: 'ajax-table',
+                    properties: {
+                        url: String,
+                        json: Boolean,
+                        columns: String
+                    },
+                    ready: function () {
+                        var dom = Polymer.dom(this);
+                        dom.innerHTML = '<progress id="progressbar" value="0" max="100">Carregando</progress>';
+                        var columns = this.columns;
+                        var ajax = new XMLHttpRequest();
+                        ajax.onreadystatechange = function() {
+                            if (isReady(ajax.readyState)) {
+                                var data = JSON.parse(ajax.responseText);
+
+                                var arrColumns = columns.split("|");
+
+                                var div = document.createElement('div');
+                                var table = document.createElement('table');
+                                table.id = 'e-ajax-table';
+                                var tr_head = document.createElement('tr');
+
+
+                                for (var i = 0; i < arrColumns.length; i++) {
+                                    var th = document.createElement('th');
+                                    th.innerHTML = colName(arrColumns[i]);
+                                    tr_head.appendChild(th);
+                                }
+
+                                table.appendChild(tr_head);
+
+                                // render data
+                                for (var d = 0; d < data.length; d++) {
+                                    var tr = document.createElement('tr');
+
+                                    for (var i = 0; i < arrColumns.length; i++) {
+                                        var td = document.createElement('td');
+
+                                        var type = colType(arrColumns[i]);
+                                        var value = data[d][colId(arrColumns[i])];
+
+                                        if (type == "text") {
+                                            td.innerHTML = value;
+                                        } else if (type == 'image') {
+                                            td.innerHTML = '<img src="'+value+'" />';
+                                        } else if (type == 'url') {
+                                            td.innerHTML = '<a href="'+value+'">'+value+'</a>'
+                                        }
+                                        
+                                        tr.appendChild(td);
+                                    }
+
+                                    table.appendChild(tr);
+                                }
+                                div.appendChild(table);
+
+                                dom.innerHTML = div.innerHTML;
+                            } else {
+                                dom.innerHTML = '<progress id="progressbar" value="'+(ajax.readyState * 20)+'" max="100">Carregando</progress>';
+                            }
+                        };
+                        ajax.open("GET", this.url, true);
+                        ajax.send();
+                    },
+                    log: function (message) {
+                        console.log(message);
+                    }
+                });
+            })();
+        });
+    </script>
+</dom-module>
